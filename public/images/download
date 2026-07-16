@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ShopQR Pro - QR Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed": "#002113",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffd4a4",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-dim": "#d3daea",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#4d44e3",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#e2dfff",
+                        "on-secondary-container": "#00714d",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-container-low": "#f0f3ff",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dce2f3",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-surface": "#151c27",
+                        "on-primary-container": "#dad7ff",
+                        "on-primary-fixed": "#0f0069",
+                        "surface-bright": "#f9f9ff",
+                        "background": "#f9f9ff",
+                        "surface-container-highest": "#dce2f3",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary-container": "#6cf8bb",
+                        "surface-container": "#e7eefe",
+                        "surface": "#f9f9ff",
+                        "outline": "#777587",
+                        "inverse-on-surface": "#ebf1ff",
+                        "tertiary": "#684000",
+                        "primary": "#3525cd",
+                        "outline-variant": "#c7c4d8",
+                        "on-surface-variant": "#464555",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "on-background": "#151c27",
+                        "secondary": "#006c49",
+                        "tertiary-container": "#885500",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#4f46e5",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "inverse-surface": "#2a313d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "32px",
+                        "unit": "4px",
+                        "gutter": "24px",
+                        "container-max-width": "1280px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .tonal-elevation {
+            box-shadow: 0px 4px 12px rgba(79, 70, 229, 0.08);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c7c4d8; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full z-40 py-6 bg-surface-container border-r border-outline-variant w-[280px]">
+<div class="px-6 mb-8">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">ShopQR Pro</h1>
+<div class="mt-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a friendly local business owner, a middle-aged woman with a warm smile, wearing a modern apron in a brightly lit, chic boutique bakery setting. The photography style is high-end corporate lifestyle with soft, natural lighting and a shallow depth of field, emphasizing a trustworthy and successful entrepreneur persona in a clean, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwKnwu6wEyAJr60JkZIVCM1ZPyuyKMGHrCfGO3I_KviCOL155sf_A2N-Zo2JgUp2AmNRGBXJ5ePNcu4jdJNq2aLG5J6vsxmhAI9u_QQcIN4WRgl9ZMLTChZPiw91bMebIgmoRW7TaKG846VQZ41ZghRK6wA0Ml_vLMa20GPawb44zVyFhBsHHPWETMwXFRhVPe5B0vOGnpRyLINaicdlouG0eqafcQ-6xUKjQeldsr0M73IMwnyRQ"/>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Local Bakery Store</p>
+<p class="text-xs text-on-surface-variant">Shop Owner</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-label-md mx-2 hover:bg-surface-variant transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-label-md mx-2 hover:bg-surface-variant transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">qr_code_2</span>
+                Generator
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-label-md rounded-lg mx-2 opacity-80" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant font-label-md mx-2 hover:bg-surface-variant transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full py-3 px-4 bg-tertiary text-white rounded-lg font-label-md flex items-center justify-center gap-2 hover:opacity-90 transition-transform active:scale-95">
+<span class="material-symbols-outlined">add</span>
+                Create New QR
+            </button>
+<div class="mt-6 space-y-1 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant font-label-md hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+                    Help Center
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant font-label-md hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    Logout
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-[280px] p-margin-mobile md:p-margin-desktop">
+<!-- Header & Filter Row -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div>
+<nav class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="text-xs font-label-md uppercase tracking-wider">Analytics</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-xs font-label-md uppercase tracking-wider text-primary">Summer Sale Promo</span>
+</nav>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">QR Performance Insight</h2>
+<p class="text-on-surface-variant font-body-md mt-1">Detailed traffic analysis for: <span class="font-semibold">shopqr.co/promo-2024</span></p>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-high p-1.5 rounded-xl border border-outline-variant">
+<button class="px-4 py-2 rounded-lg text-label-md transition-all bg-surface-container-lowest shadow-sm text-primary">Last 7 Days</button>
+<button class="px-4 py-2 rounded-lg text-label-md transition-all text-on-surface-variant hover:bg-surface-container-lowest">30 Days</button>
+<button class="px-4 py-2 rounded-lg text-label-md transition-all text-on-surface-variant hover:bg-surface-container-lowest">90 Days</button>
+</div>
+</header>
+<!-- KPI Metrics Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-gutter">
+<!-- Total Scans -->
+<div class="glass-card tonal-elevation p-6 rounded-xl flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="p-3 bg-primary-container/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">qr_code_scanner</span>
+</div>
+<span class="text-secondary font-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                        12.5%
+                    </span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-md">Total Scans</p>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mt-1">2,842</h3>
+</div>
+</div>
+<!-- Unique Users -->
+<div class="glass-card tonal-elevation p-6 rounded-xl flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="p-3 bg-secondary-container/20 rounded-lg">
+<span class="material-symbols-outlined text-secondary">group</span>
+</div>
+<span class="text-secondary font-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                        8.2%
+                    </span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-md">Unique Users</p>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mt-1">1,957</h3>
+</div>
+</div>
+<!-- Peak Time -->
+<div class="glass-card tonal-elevation p-6 rounded-xl flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="p-3 bg-tertiary-fixed-dim/20 rounded-lg">
+<span class="material-symbols-outlined text-tertiary">schedule</span>
+</div>
+<div class="px-2 py-1 bg-surface-container-high rounded text-[10px] font-bold text-on-surface-variant uppercase">Most Active</div>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-md">Peak Scan Time</p>
+<h3 class="font-headline-lg text-headline-lg text-on-surface mt-1">12:45 PM</h3>
+</div>
+</div>
+</section>
+<!-- Main Chart Area (Bento Grid Style) -->
+<section class="grid grid-cols-12 gap-gutter">
+<!-- Daily Scans Line Graph -->
+<div class="col-span-12 lg:col-span-8 glass-card tonal-elevation p-6 rounded-xl min-h-[400px] flex flex-col">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Scan Velocity</h4>
+<p class="text-on-surface-variant text-body-sm">Tracking interaction frequency over the last week</p>
+</div>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex-1 relative">
+<canvas id="velocityChart"></canvas>
+</div>
+</div>
+<!-- Device Type Pie Chart -->
+<div class="col-span-12 lg:col-span-4 glass-card tonal-elevation p-6 rounded-xl flex flex-col">
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-6">Device Distribution</h4>
+<div class="flex-1 flex flex-col items-center justify-center">
+<div class="w-full max-w-[240px] mb-8">
+<canvas id="deviceChart"></canvas>
+</div>
+<div class="w-full space-y-3">
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-[#4f46e5]"></span>
+<span class="font-label-md">Mobile</span>
+</div>
+<span class="font-bold">84%</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-[#6cf8bb]"></span>
+<span class="font-label-md">Desktop</span>
+</div>
+<span class="font-bold">16%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Location Bar Chart -->
+<div class="col-span-12 lg:col-span-12 glass-card tonal-elevation p-6 rounded-xl">
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Top Scan Locations</h4>
+<p class="text-on-surface-variant text-body-sm">City-level geographical data based on IP mapping</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-label-md text-on-surface-variant uppercase">Export Data</span>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm">download</span>
+</button>
+</div>
+</div>
+<div class="h-[300px]">
+<canvas id="locationChart"></canvas>
+</div>
+</div>
+</section>
+<!-- Footer (Shared Component Logic) -->
+<footer class="w-full py-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-outline-variant">
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 ShopQR. Empowering local businesses globally.</p>
+<div class="flex items-center gap-6">
+<a class="text-on-surface-variant font-label-sm hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-label-sm hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-on-surface-variant font-label-sm hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</footer>
+</main>
+<script>
+        // Set Chart.js Defaults
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.color = '#464555';
+
+        // Velocity Chart (Line)
+        const velocityCtx = document.getElementById('velocityChart').getContext('2d');
+        new Chart(velocityCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Scans',
+                    data: [120, 190, 320, 280, 450, 680, 520],
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { borderDash: [5, 5], color: '#c7c4d8' }, beginAtZero: true },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Device Distribution Chart (Doughnut)
+        const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+        new Chart(deviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mobile', 'Desktop'],
+                datasets: [{
+                    data: [84, 16],
+                    backgroundColor: ['#4f46e5', '#6cf8bb'],
+                    hoverOffset: 4,
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Location Chart (Bar)
+        const locationCtx = document.getElementById('locationChart').getContext('2d');
+        new Chart(locationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['San Francisco', 'New York', 'London', 'Berlin', 'Tokyo', 'Sydney', 'Paris'],
+                datasets: [{
+                    label: 'Scans',
+                    data: [840, 720, 590, 480, 390, 310, 280],
+                    backgroundColor: '#3525cd',
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { grid: { borderDash: [5, 5], color: '#c7c4d8' }, beginAtZero: true },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Micro-interactions
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 100);
+            });
+        });
+    </script>
+</body></html>

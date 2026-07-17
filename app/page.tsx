@@ -1320,16 +1320,22 @@ export default function LandingPage() {
             © 2024 ShopQR. Empowering local businesses globally.
           </p>
         </div>
-        <div className="flex gap-8 font-semibold">
-          <a href="#faq" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 font-semibold">
+          <Link href="/privacy-policy" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
             Privacy Policy
-          </a>
-          <a href="#faq" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+          </Link>
+          <Link href="/terms-of-service" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
             Terms of Service
-          </a>
-          <a href="#faq" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+          </Link>
+          <Link href="/cookie-policy" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+            Cookie Policy
+          </Link>
+          <Link href="/gdpr" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+            GDPR
+          </Link>
+          <Link href="/contact" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
             Contact Support
-          </a>
+          </Link>
         </div>
         <div className="flex gap-4">
           <a

@@ -7,14 +7,20 @@ export default function Footer() {
         <Link href="/" className="font-jakarta text-lg font-bold text-primary hover:opacity-80 transition-opacity">ShopQR</Link>
         <p className="text-sm text-on-surface-variant">© 2024 ShopQR. Empowering local businesses globally.</p>
       </div>
-      <div className="flex gap-6">
-        <Link href="/" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+        <Link href="/privacy-policy" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
           Privacy Policy
         </Link>
-        <Link href="/" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
+        <Link href="/terms-of-service" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
           Terms of Service
         </Link>
-        <Link href="/" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
+        <Link href="/cookie-policy" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
+          Cookie Policy
+        </Link>
+        <Link href="/gdpr" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
+          GDPR
+        </Link>
+        <Link href="/contact" className="text-on-surface-variant text-xs font-medium hover:text-primary transition-colors">
           Contact Support
         </Link>
       </div>

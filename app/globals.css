@@ -4,6 +4,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222 47% 11%;
@@ -43,21 +47,107 @@
   }
 }
 
+/* Glassmorphism Styles */
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .tonal-elevation {
-  box-shadow: 0px 4px 12px rgba(79, 70, 229, 0.08);
+  box-shadow: 0px 8px 30px rgba(79, 70, 229, 0.04);
 }
 
+/* Custom Grid Pattern Background */
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(53, 37, 205, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(53, 37, 205, 0.02) 1px, transparent 1px);
+}
+
+/* Ambient Pulsing & Floating Blobs */
+@keyframes float-blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.15);
+  }
+  66% {
+    transform: translate(-30px, 30px) scale(0.9);
+  }
+}
+
+.animate-float-blob {
+  animation: float-blob 22s infinite ease-in-out;
+}
+
+.animate-float-blob-reverse {
+  animation: float-blob 28s infinite ease-in-out reverse;
+}
+
+/* Shimmer Sheen effect for premium buttons */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 20%,
+    rgba(255, 255, 255, 0.6) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 2.5s infinite;
+}
+
+/* Premium gradient border glow on hover */
+.hover-glow {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom right, #3525cd, transparent 40%, #006c49 80%, #ffb95f);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.hover-glow:hover::before {
+  opacity: 1;
+}
+
+/* Scrollbar Customization */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f3f9;
 }
 ::-webkit-scrollbar-thumb {
   background: #c7c4d8;

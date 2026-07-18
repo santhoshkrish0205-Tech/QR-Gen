@@ -89,7 +89,7 @@ export default function SettingsPage() {
                   <input
                     value={storeName}
                     onChange={(e) => setStoreName(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
                   />
                 </div>
                 <div>
@@ -98,7 +98,7 @@ export default function SettingsPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     type="email"
-                    className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
                   />
                 </div>
               </div>
@@ -107,7 +107,7 @@ export default function SettingsPage() {
             {/* Brand Defaults */}
             <section className="p-6 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/50">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+                <div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-shopsecondary">
                   <Palette className="w-5 h-5" />
                 </div>
                 <h3 className="font-jakarta text-xl font-semibold">Brand Defaults</h3>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Sidebar from '@/components/sidebar';
 import { useQr } from '@/lib/qr-context';
 import { toast } from 'sonner';
@@ -223,7 +224,7 @@ export default function GeneratorPage() {
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
                       placeholder="e.g., Summer Sale 2024"
                     />
                   </div>
@@ -236,7 +237,7 @@ export default function GeneratorPage() {
                         <input
                           value={wifiSsid}
                           onChange={(e) => setWifiSsid(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
                           placeholder="MyShop_Guest"
                         />
                       </div>
@@ -245,7 +246,7 @@ export default function GeneratorPage() {
                         <input
                           value={wifiPassword}
                           onChange={(e) => setWifiPassword(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
                           placeholder="Enter Wi-Fi password"
                           type="password"
                         />
@@ -275,7 +276,7 @@ export default function GeneratorPage() {
                       <input
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
                         placeholder={selectedType === 'Menu' ? 'https://yourshop.com/menu.pdf' : 'https://yourshop.com'}
                         type="url"
                       />
@@ -287,7 +288,7 @@ export default function GeneratorPage() {
               {/* Section 2: Style & Branding */}
               <section className="p-6 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/50">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+                  <div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-shopsecondary">
                     <Palette className="w-5 h-5" />
                   </div>
                   <h3 className="font-jakarta text-xl font-semibold">Style & Branding</h3>
@@ -445,9 +446,9 @@ export default function GeneratorPage() {
         </button>
         <span className="font-jakarta text-lg font-bold text-primary">ShopQR</span>
         <div className="ml-auto flex gap-3">
-          <button onClick={() => router.push('/dashboard')} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
+          <Link href="/dashboard" className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
             <Bell className="w-5 h-5" />
-          </button>
+          </Link>
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary-container to-secondary-container" />
         </div>
       </div>

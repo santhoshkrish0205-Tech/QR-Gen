@@ -2,14 +2,15 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { QrProvider } from '@/lib/qr-context';
+import { MenuProvider } from '@/lib/menu-context';
 import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'ShopQR Pro — Everything your customers need. One QR platform.',
+  title: 'ShopQR — Business QR Platform for Restaurants',
   description:
-    'Empower your business with dynamic QR codes that drive sales, gather reviews, and simplify payments.',
+    'Create a digital menu for your restaurant in minutes. Customers scan one QR, never print again. Change prices live.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -21,14 +22,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Playfair+Display:wght@400;600;700&display=swap"
           rel="stylesheet"
         />
       </head>
       <body className={inter.variable}>
         <QrProvider>
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
+          <MenuProvider>
+            {children}
+            <Toaster position="bottom-right" richColors closeButton />
+          </MenuProvider>
         </QrProvider>
       </body>
     </html>

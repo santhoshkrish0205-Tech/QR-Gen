@@ -300,23 +300,22 @@ export default function LandingPage() {
         }
       `}</style>
       {/* Top scroll progress indicator */}
-      <div 
-        className="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary to-secondary z-[60] transition-all duration-75" 
+      <div
+        className="fixed top-0 left-0 h-1 bg-gradient-to-r from-primary to-secondary z-[60] transition-all duration-75"
         style={{ width: `${scrollProgress}%` }}
       />
 
       {/* TopNavBar */}
-      <nav 
-        className={`fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 h-16 transition-all duration-300 ${
-          isScrolled 
-            ? 'bg-white/80 dark:bg-slate-900/80 border-b border-outline-variant/40 shadow-lg backdrop-blur-md' 
-            : 'bg-transparent'
-        }`}
+      <nav
+        className={`fixed top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 h-16 transition-all duration-300 ${isScrolled
+          ? 'bg-white/80 dark:bg-slate-900/80 border-b border-outline-variant/40 shadow-lg backdrop-blur-md'
+          : 'bg-transparent'
+          }`}
       >
         <Link href="/" className="font-jakarta text-2xl font-extrabold text-primary hover:scale-105 transition-transform">
           ShopQR
         </Link>
-        
+
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-on-surface-variant font-bold text-sm hover:text-primary transition-colors">
@@ -341,9 +340,9 @@ export default function LandingPage() {
             Get Started
           </Link>
         </div>
-
+        openWa on GitHub
         {/* Mobile Menu Button */}
-        <button 
+        <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="md:hidden p-2 rounded-xl hover:bg-surface-container-high transition-colors text-on-surface"
           aria-label="Toggle menu"
@@ -354,29 +353,29 @@ export default function LandingPage() {
         {/* Mobile Slide-Down Menu */}
         {isMobileMenuOpen && (
           <div className="absolute top-16 left-0 w-full bg-white border-b border-outline-variant shadow-2xl p-6 flex flex-col gap-4 animate-fade-in-up md:hidden text-left z-50">
-            <a 
-              href="#features" 
+            <a
+              href="#features"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-on-surface-variant font-bold text-base hover:text-primary py-2 border-b border-outline-variant/10"
             >
               Features
             </a>
-            <a 
-              href="#solutions" 
+            <a
+              href="#solutions"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-on-surface-variant font-bold text-base hover:text-primary py-2 border-b border-outline-variant/10"
             >
               Solutions
             </a>
-            <a 
-              href="#pricing" 
+            <a
+              href="#pricing"
               onClick={() => setIsMobileMenuOpen(false)}
               className="text-on-surface-variant font-bold text-base hover:text-primary py-2 border-b border-outline-variant/10"
             >
               Pricing
             </a>
             <div className="flex flex-col gap-3 pt-2">
-              <Link 
+              <Link
                 href="/dashboard"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-center text-on-surface-variant font-bold text-sm hover:text-primary py-2.5 rounded-xl border border-outline-variant"
@@ -401,7 +400,7 @@ export default function LandingPage() {
           {/* Animated Background Blobs */}
           <div className="absolute top-1/4 left-10 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float-blob pointer-events-none" />
           <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-secondary/15 rounded-full blur-3xl animate-float-blob-reverse pointer-events-none" />
-          
+
           <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-12 items-center relative">
             <div className="z-10 text-left font-sans">
               <ScrollReveal variant="fade-up">
@@ -427,8 +426,8 @@ export default function LandingPage() {
                   Get Started for Free
                   <ArrowRight className="w-5 h-5" />
                 </Link>
-                <a 
-                  href="#features" 
+                <a
+                  href="#features"
                   className="bg-white border border-outline-variant text-on-surface font-bold px-8 py-4 rounded-xl hover:bg-surface-container hover:border-on-surface/20 transition-all text-center"
                 >
                   View Demo
@@ -446,9 +445,9 @@ export default function LandingPage() {
                 <p className="text-xs font-semibold">Joined by 2,000+ local shop owners</p>
               </ScrollReveal>
             </div>
-            
+
             <ScrollReveal variant="scale-up" delay={200} className="relative flex justify-center">
-              <div 
+              <div
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 style={tiltStyle}
@@ -490,7 +489,7 @@ export default function LandingPage() {
                 </p>
               </ScrollReveal>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Feature 1 */}
               <ScrollReveal variant="fade-up" className="md:col-span-2" delay={100}>
@@ -688,7 +687,7 @@ export default function LandingPage() {
               </ScrollReveal>
             </div>
 
-            <div 
+            <div
               onMouseEnter={() => setIsStepsHovered(true)}
               onMouseLeave={() => setIsStepsHovered(false)}
               className="grid lg:grid-cols-12 gap-12 items-center"
@@ -710,7 +709,7 @@ export default function LandingPage() {
                     >
                       {active && (
                         <div className="absolute bottom-0 left-0 h-1 bg-primary/20 w-full overflow-hidden rounded-b-2xl">
-                          <div 
+                          <div
                             className="h-full bg-primary"
                             style={{
                               animation: 'progress-bar 4s linear forwards',
@@ -721,7 +720,7 @@ export default function LandingPage() {
                       )}
                       <div className={`p-3 rounded-xl transition-all ${active ? 'bg-primary text-white scale-110 shadow-md' : 'bg-surface-container text-on-surface-variant'
                         }`}>
-                      <IconComponent className="w-6 h-6" />
+                        <IconComponent className="w-6 h-6" />
                       </div>
                       <div className="text-left">
                         <div className="flex items-center gap-2">
@@ -882,11 +881,11 @@ export default function LandingPage() {
                         <line x1="66.6" y1="0" x2="66.6" y2="100" stroke="rgba(255,255,255,0.12)" strokeDasharray="2,2" className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                         {/* Last Week Line (Comparison) */}
-                        <path 
-                          d="M 0,85 C 8,85 8,75 16.6,75 C 25,75 25,70 33.3,70 C 41.6,70 41.6,55 50,55 C 58.3,55 58.3,40 66.6,40 C 75,40 75,30 83.3,30 C 91.6,30 91.6,60 100,60" 
-                          fill="none" 
-                          stroke="url(#compStrokeGrad)" 
-                          strokeWidth="1.5" 
+                        <path
+                          d="M 0,85 C 8,85 8,75 16.6,75 C 25,75 25,70 33.3,70 C 41.6,70 41.6,55 50,55 C 58.3,55 58.3,40 66.6,40 C 75,40 75,30 83.3,30 C 91.6,30 91.6,60 100,60"
+                          fill="none"
+                          stroke="url(#compStrokeGrad)"
+                          strokeWidth="1.5"
                           strokeDasharray="3,3"
                           style={isChartVisible ? {
                             strokeDasharray: '3,3',
@@ -898,9 +897,9 @@ export default function LandingPage() {
                         />
 
                         {/* Main Line Area Fill */}
-                        <path 
-                          d="M 0,75 C 8,75 8,60 16.6,60 C 25,60 25,80 33.3,80 C 41.6,80 41.6,45 50,45 C 58.3,45 58.3,15 66.6,15 C 75,15 75,50 83.3,50 C 91.6,50 91.6,70 100,70 L 100,100 L 0,100 Z" 
-                          fill="url(#areaGrad)" 
+                        <path
+                          d="M 0,75 C 8,75 8,60 16.6,60 C 25,60 25,80 33.3,80 C 41.6,80 41.6,45 50,45 C 58.3,45 58.3,15 66.6,15 C 75,15 75,50 83.3,50 C 91.6,50 91.6,70 100,70 L 100,100 L 0,100 Z"
+                          fill="url(#areaGrad)"
                           className="origin-bottom"
                           style={isChartVisible ? {
                             animation: 'fade-in-fill 1.5s ease-out 0.8s both',
@@ -910,11 +909,11 @@ export default function LandingPage() {
                         />
 
                         {/* Main Line (Current Week) */}
-                        <path 
-                          d="M 0,75 C 8,75 8,60 16.6,60 C 25,60 25,80 33.3,80 C 41.6,80 41.6,45 50,45 C 58.3,45 58.3,15 66.6,15 C 75,15 75,50 83.3,50 C 91.6,50 91.6,70 100,70" 
-                          fill="none" 
-                          stroke="url(#mainStrokeGrad)" 
-                          strokeWidth="3.5" 
+                        <path
+                          d="M 0,75 C 8,75 8,60 16.6,60 C 25,60 25,80 33.3,80 C 41.6,80 41.6,45 50,45 C 58.3,45 58.3,15 66.6,15 C 75,15 75,50 83.3,50 C 91.6,50 91.6,70 100,70"
+                          fill="none"
+                          stroke="url(#mainStrokeGrad)"
+                          strokeWidth="3.5"
                           strokeLinecap="round"
                           style={isChartVisible ? {
                             strokeDasharray: 400,
@@ -929,29 +928,29 @@ export default function LandingPage() {
                         {/* Glowing Peak Dot on Friday (66.6, 15) */}
                         <g className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           {/* Outer Glow */}
-                          <circle 
-                            cx="66.6" 
-                            cy="15" 
-                            r="6" 
-                            fill="#00f0ff" 
-                            fillOpacity="0.3" 
-                            className="animate-ping" 
-                            style={{ transformOrigin: '66.6px 15px' }} 
+                          <circle
+                            cx="66.6"
+                            cy="15"
+                            r="6"
+                            fill="#00f0ff"
+                            fillOpacity="0.3"
+                            className="animate-ping"
+                            style={{ transformOrigin: '66.6px 15px' }}
                           />
                           {/* Medium Ring */}
-                          <circle 
-                            cx="66.6" 
-                            cy="15" 
-                            r="4" 
-                            fill="#00f0ff" 
-                            fillOpacity="0.5" 
+                          <circle
+                            cx="66.6"
+                            cy="15"
+                            r="4"
+                            fill="#00f0ff"
+                            fillOpacity="0.5"
                           />
                           {/* Core Solid Circle */}
-                          <circle 
-                            cx="66.6" 
-                            cy="15" 
-                            r="2" 
-                            fill="#fff" 
+                          <circle
+                            cx="66.6"
+                            cy="15"
+                            r="2"
+                            fill="#fff"
                           />
                         </g>
                       </svg>
@@ -1017,7 +1016,7 @@ export default function LandingPage() {
                           {sol.title}
                           {active && (
                             <div className="absolute bottom-0 left-0 h-0.5 bg-primary/20 w-full overflow-hidden">
-                              <div 
+                              <div
                                 className="h-full bg-primary"
                                 style={{
                                   animation: 'progress-bar 5s linear forwards',
@@ -1113,9 +1112,8 @@ export default function LandingPage() {
                 return (
                   <div
                     key={idx}
-                    className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 ${
-                      isOpen ? 'border-primary shadow-lg' : 'border-outline-variant/60 shadow-sm hover:border-outline-variant'
-                    }`}
+                    className={`bg-white border rounded-2xl overflow-hidden transition-all duration-300 ${isOpen ? 'border-primary shadow-lg' : 'border-outline-variant/60 shadow-sm hover:border-outline-variant'
+                      }`}
                   >
                     <button
                       onClick={() => setOpenFaq(isOpen ? null : idx)}
@@ -1186,10 +1184,10 @@ export default function LandingPage() {
                   </div>
                   <ul className="space-y-4 mb-8 font-medium">
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> 5 Static QR Codes
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> 5 Static QR Codes
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Basic Design Templates
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Basic Design Templates
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant/50">
                       <XCircle className="text-outline-variant w-5 h-5 shrink-0" /> Scan Analytics
@@ -1221,16 +1219,16 @@ export default function LandingPage() {
                   </div>
                   <ul className="space-y-4 mb-8 font-medium">
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Unlimited Dynamic QRs
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Unlimited Dynamic QRs
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Advanced Analytics Dashboard
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Advanced Analytics Dashboard
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Custom Branding & Logos
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Custom Branding & Logos
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Password Protected Links
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Password Protected Links
                     </li>
                   </ul>
                   <Link href="/dashboard" className="w-full py-4 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all block text-center shimmer-button">
@@ -1256,13 +1254,13 @@ export default function LandingPage() {
                   </div>
                   <ul className="space-y-4 mb-8 font-medium">
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Everything in Pro
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Everything in Pro
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> Multi-Store Management
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> Multi-Store Management
                     </li>
                     <li className="flex items-center gap-3 text-sm text-on-surface-variant">
-                      <CheckCircle className="text-secondary w-5 h-5 shrink-0" /> API Access & Webhooks
+                      <CheckCircle className="text-shopsecondary w-5 h-5 shrink-0" /> API Access & Webhooks
                     </li>
                   </ul>
                   <button onClick={() => toast.info('Our sales team will contact you shortly!', { description: 'We typically respond within 24 hours.' })} className="w-full py-3 rounded-xl border border-outline text-on-surface font-bold text-sm hover:bg-surface-container transition-colors">
@@ -1281,7 +1279,7 @@ export default function LandingPage() {
               <div className="bg-inverse-surface rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden shadow-3xl">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
                 <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 blur-3xl rounded-full -translate-x-1/2 translate-y-1/2" />
-                
+
                 <div className="relative z-10 font-sans">
                   <h2 className="font-jakarta text-3xl md:text-5xl text-inverse-on-surface mb-6 font-extrabold tracking-tight">
                     Ready to transform your shop floor?
@@ -1296,8 +1294,8 @@ export default function LandingPage() {
                     >
                       Get Started for Free <ArrowRight className="w-5 h-5" />
                     </Link>
-                    <button 
-                      onClick={() => toast.info('Our team will contact you shortly!', { description: 'We typically respond within 24 hours.' })} 
+                    <button
+                      onClick={() => toast.info('Our team will contact you shortly!', { description: 'We typically respond within 24 hours.' })}
                       className="border border-outline-variant text-inverse-on-surface font-bold px-10 py-5 rounded-2xl hover:bg-white/5 transition-colors"
                     >
                       Talk to an Expert
@@ -1320,22 +1318,16 @@ export default function LandingPage() {
             © 2024 ShopQR. Empowering local businesses globally.
           </p>
         </div>
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 font-semibold">
-          <Link href="/privacy-policy" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+        <div className="flex gap-8 font-semibold">
+          <a href="#faq" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
             Privacy Policy
-          </Link>
-          <Link href="/terms-of-service" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+          </a>
+          <a href="#faq" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
             Terms of Service
-          </Link>
-          <Link href="/cookie-policy" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
-            Cookie Policy
-          </Link>
-          <Link href="/gdpr" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
-            GDPR
-          </Link>
-          <Link href="/contact" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
+          </a>
+          <a href="#faq" className="text-on-surface-variant text-xs hover:text-primary transition-colors">
             Contact Support
-          </Link>
+          </a>
         </div>
         <div className="flex gap-4">
           <a

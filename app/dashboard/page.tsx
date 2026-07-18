@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/sidebar';
@@ -27,6 +27,7 @@ import {
   LogOut,
   User,
   Check,
+  UtensilsCrossed,
 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 5;
@@ -34,6 +35,28 @@ const ITEMS_PER_PAGE = 5;
 export default function DashboardPage() {
   const router = useRouter();
   const { qrCodes, activityLog, unreadCount, markAllRead, updateQrCode, deleteQrCode, toggleStatus, addActivity } = useQr();
+
+  const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotif(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfile(false);
+      }
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setShowFilter(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<'All' | 'Active' | 'Paused'>('All');
@@ -116,7 +139,7 @@ export default function DashboardPage() {
 
   const stats = [
     { label: 'Total QR Codes', value: totalCodes.toString(), trend: `${qrCodes.filter(c => c.status === 'Active').length} active`, icon: QrCode, color: 'primary' },
-    { label: 'Monthly Scans', value: totalScans.toLocaleString(), trend: '+5.4% vs last mo.', icon: BarChart2, color: 'secondary' },
+    { label: 'Monthly Scans', value: totalScans.toLocaleString(), trend: '+5.4% vs last mo.', icon: BarChart2, color: 'shopsecondary' },
     { label: "Today's Scans", value: todayScans.toLocaleString(), trend: '-2% vs yesterday', icon: Zap, color: 'tertiary', negative: true },
   ];
 
@@ -135,13 +158,13 @@ export default function DashboardPage() {
               <input
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                className="pl-10 pr-4 py-2 border border-outline-variant rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-64 bg-surface-container-low"
+                className="pl-10 pr-4 py-2 border border-outline-variant rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all w-64 bg-surface-container-low text-on-surface"
                 placeholder="Search codes..."
               />
             </div>
 
             {/* Notification Bell */}
-            <div className="relative">
+            <div className="relative" ref={notifRef}>
               <button
                 onClick={() => { setShowNotif(!showNotif); setShowProfile(false); if (!showNotif) markAllRead(); }}
                 className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-variant transition-colors relative"
@@ -170,20 +193,20 @@ export default function DashboardPage() {
             </div>
 
             {/* Profile Avatar */}
-            <div className="relative">
+            <div className="relative" ref={profileRef}>
               <button onClick={() => { setShowProfile(!showProfile); setShowNotif(false); }} className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-gradient-to-br from-primary-container to-secondary-container" />
               {showProfile && (
                 <div className="absolute right-0 top-12 w-48 bg-white border border-outline-variant rounded-xl shadow-2xl z-50 overflow-hidden py-1">
-                  <button onClick={() => { router.push('/settings'); setShowProfile(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                  <Link href="/settings" onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
                     <User className="w-4 h-4" /> My Profile
-                  </button>
-                  <button onClick={() => { router.push('/settings'); setShowProfile(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                  </Link>
+                  <Link href="/settings" onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
                     <Settings className="w-4 h-4" /> Settings
-                  </button>
+                  </Link>
                   <hr className="border-outline-variant/40 my-1" />
-                  <button onClick={() => { router.push('/'); setShowProfile(false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-surface-container-low transition-colors">
+                  <Link href="/" onClick={() => setShowProfile(false)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-surface-container-low transition-colors">
                     <LogOut className="w-4 h-4" /> Logout
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
@@ -203,14 +226,14 @@ export default function DashboardPage() {
                     className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
                       s.color === 'primary'
                         ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'
-                        : s.color === 'secondary'
-                        ? 'bg-secondary/10 text-secondary group-hover:bg-secondary group-hover:text-white'
+                        : s.color === 'shopsecondary'
+                        ? 'bg-shopsecondary/10 text-shopsecondary group-hover:bg-shopsecondary group-hover:text-white'
                         : 'bg-tertiary-container/10 text-tertiary-container group-hover:bg-tertiary-container group-hover:text-white'
                     }`}
                   >
                     <s.icon className="w-6 h-6" />
                   </div>
-                  <span className={`text-xs font-medium ${s.negative ? 'text-error' : 'text-secondary'}`}>{s.trend}</span>
+                  <span className={`text-xs font-medium ${s.negative ? 'text-error' : 'text-shopsecondary'}`}>{s.trend}</span>
                 </div>
                 <h3 className="text-xs text-on-surface-variant">{s.label}</h3>
                 <p className="font-jakarta text-3xl font-bold text-on-surface">{s.value}</p>
@@ -223,10 +246,10 @@ export default function DashboardPage() {
                   <h3 className="text-xs text-on-surface-variant mb-2">Live Status</h3>
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-secondary" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-shopsecondary opacity-75" />
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-shopsecondary" />
                     </span>
-                    <p className="text-sm font-medium text-secondary">Active Campaign</p>
+                    <p className="text-sm font-medium text-shopsecondary">Active Campaign</p>
                   </div>
                 </div>
                 <p className="text-sm text-on-surface-variant mt-2">
@@ -244,7 +267,7 @@ export default function DashboardPage() {
                 <h2 className="font-jakarta text-xl font-semibold text-on-surface">My QR Codes</h2>
                 <div className="flex items-center gap-2">
                   {/* Filter Dropdown */}
-                  <div className="relative">
+                  <div className="relative" ref={filterRef}>
                     <button
                       onClick={() => setShowFilter(!showFilter)}
                       className={`px-4 py-2 bg-surface-container border border-outline-variant rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-surface-variant transition-colors ${(filterStatus !== 'All' || filterType !== 'All') ? 'border-primary text-primary' : ''}`}
@@ -284,12 +307,12 @@ export default function DashboardPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => router.push('/generator')}
+                  <Link
+                    href="/generator"
                     className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity"
                   >
                     <Plus className="w-4 h-4" /> New Code
-                  </button>
+                  </Link>
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -322,7 +345,7 @@ export default function DashboardPage() {
                             onClick={() => { toggleStatus(qr.id); toast.info(`${qr.name} ${qr.status === 'Active' ? 'paused' : 'activated'}`); }}
                             className={`px-2 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${
                               qr.status === 'Active'
-                                ? 'bg-secondary/10 text-secondary hover:bg-secondary/20'
+                                ? 'bg-shopsecondary/10 text-shopsecondary hover:bg-shopsecondary/20'
                                 : 'bg-tertiary-container/10 text-tertiary-container hover:bg-tertiary-container/20'
                             }`}
                           >
@@ -340,9 +363,9 @@ export default function DashboardPage() {
                             <button onClick={() => handleDownload(qr)} title="Download QR" className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
                               <Download className="w-4 h-4" />
                             </button>
-                            <button onClick={() => router.push(`/analytics`)} title="View Analytics" className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                            <Link href="/analytics" title="View Analytics" className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
                               <BarChart2 className="w-4 h-4" />
-                            </button>
+                            </Link>
                             <button onClick={() => openEdit(qr)} title="Edit Code" className="p-2 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
                               <Edit className="w-4 h-4" />
                             </button>
@@ -387,16 +410,22 @@ export default function DashboardPage() {
               {/* Quick Actions */}
               <div className="bg-primary p-6 rounded-xl text-white shadow-lg relative overflow-hidden group">
                 <div className="relative z-10">
-                  <h3 className="font-jakarta text-xl font-semibold mb-4">Ready for a new scan?</h3>
+                  <h3 className="font-jakarta text-xl font-semibold mb-4">Your Digital Menu</h3>
                   <p className="text-sm mb-6 opacity-90">
-                    Design a customized QR code for your latest promotion in seconds.
+                    Edit your restaurant menu. Changes go live instantly — no reprints needed.
                   </p>
-                  <button
-                    onClick={() => router.push('/generator')}
-                    className="w-full py-3 bg-secondary-container text-on-secondary-container rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-white transition-colors"
+                  <Link
+                    href="/menu-builder"
+                    className="w-full py-3 bg-secondary-container text-on-secondary-container rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-white transition-colors mb-2"
                   >
-                    <Sparkles className="w-4 h-4" /> Launch AI Generator
-                  </button>
+                    <UtensilsCrossed className="w-4 h-4" /> Open Menu Builder
+                  </Link>
+                  <Link
+                    href="/generator"
+                    className="w-full py-2 border border-white/30 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
+                  >
+                    <Sparkles className="w-4 h-4" /> QR Generator
+                  </Link>
                 </div>
                 <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
               </div>
@@ -417,12 +446,12 @@ export default function DashboardPage() {
                   ))}
                   {activityLog.length === 0 && <p className="text-sm text-on-surface-variant text-center py-4">No activity yet</p>}
                 </div>
-                <button
-                  onClick={() => router.push('/analytics')}
-                  className="w-full mt-6 py-2 border border-outline-variant text-on-surface-variant rounded-lg text-sm font-medium hover:bg-surface-variant transition-colors"
+                <Link
+                  href="/analytics"
+                  className="w-full mt-6 py-2 border border-outline-variant text-on-surface-variant rounded-lg text-sm font-medium hover:bg-surface-variant transition-colors block text-center"
                 >
                   View All Activity
-                </button>
+                </Link>
               </div>
             </section>
           </div>
@@ -431,12 +460,12 @@ export default function DashboardPage() {
         <Footer />
 
         {/* FAB */}
-        <button
-          onClick={() => router.push('/generator')}
+        <Link
+          href="/generator"
           className="fixed bottom-8 right-8 w-14 h-14 bg-primary rounded-full shadow-2xl flex items-center justify-center text-white hover:scale-110 active:scale-95 transition-all lg:hidden z-50"
         >
           <Plus className="w-6 h-6" />
-        </button>
+        </Link>
       </main>
 
       {/* Edit Modal */}
@@ -449,16 +478,16 @@ export default function DashboardPage() {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5 text-on-surface">Name</label>
-              <input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" />
+              <input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white" />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1.5 text-on-surface">Destination URL</label>
-              <input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="https://..." />
+              <input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white" placeholder="https://..." />
             </div>
             <div className="flex items-center justify-between">
               <button
                 onClick={() => { toggleStatus(editingCode.id); setEditingCode(null); toast.info(`Status toggled`); }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${editingCode.status === 'Active' ? 'border-tertiary-container text-tertiary-container hover:bg-tertiary-container/10' : 'border-secondary text-secondary hover:bg-secondary/10'}`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${editingCode.status === 'Active' ? 'border-tertiary-container text-tertiary-container hover:bg-tertiary-container/10' : 'border-shopsecondary text-shopsecondary hover:bg-shopsecondary/10'}`}
               >
                 {editingCode.status === 'Active' ? 'Pause Code' : 'Activate Code'}
               </button>

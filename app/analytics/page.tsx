@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import Sidebar from '@/components/sidebar';
 import Footer from '@/components/footer';
 import { useQr } from '@/lib/qr-context';
@@ -67,6 +67,24 @@ export default function AnalyticsPage() {
   const [selectedCodeId, setSelectedCodeId] = useState<string | null>(null);
   const [showCodeSelector, setShowCodeSelector] = useState(false);
 
+  const codeSelectorRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (codeSelectorRef.current && !codeSelectorRef.current.contains(event.target as Node)) {
+        setShowCodeSelector(false);
+      }
+      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
+        setShowMore(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const selectedCode = selectedCodeId ? qrCodes.find((c) => c.id === selectedCodeId) : null;
   const codeName = selectedCode?.name || 'Summer Sale Promo';
 
@@ -109,7 +127,7 @@ export default function AnalyticsPage() {
             <nav className="flex items-center gap-2 text-on-surface-variant mb-2">
               <span className="text-xs font-medium uppercase tracking-wider">Analytics</span>
               <ChevronRight className="w-3 h-3" />
-              <div className="relative">
+              <div className="relative" ref={codeSelectorRef}>
                 <button
                   onClick={() => setShowCodeSelector(!showCodeSelector)}
                   className="text-xs font-medium uppercase tracking-wider text-primary flex items-center gap-1 hover:opacity-80 transition-opacity"
@@ -165,7 +183,7 @@ export default function AnalyticsPage() {
               <div className="p-3 bg-primary-container/10 rounded-lg">
                 <QrIcon className="w-6 h-6 text-primary" />
               </div>
-              <span className="text-secondary font-medium text-sm flex items-center gap-1">
+              <span className="text-shopsecondary font-medium text-sm flex items-center gap-1">
                 <TrendingUp className="w-4 h-4" /> 12.5%
               </span>
             </div>
@@ -177,9 +195,9 @@ export default function AnalyticsPage() {
           <div className="glass-card tonal-elevation p-6 rounded-xl flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div className="p-3 bg-secondary-container/20 rounded-lg">
-                <Users className="w-6 h-6 text-secondary" />
+                <Users className="w-6 h-6 text-shopsecondary" />
               </div>
-              <span className="text-secondary font-medium text-sm flex items-center gap-1">
+              <span className="text-shopsecondary font-medium text-sm flex items-center gap-1">
                 <TrendingUp className="w-4 h-4" /> 8.2%
               </span>
             </div>
@@ -213,7 +231,7 @@ export default function AnalyticsPage() {
                 <h4 className="font-jakarta text-xl font-semibold text-on-surface">Scan Velocity</h4>
                 <p className="text-on-surface-variant text-sm">Tracking interaction frequency — {range}</p>
               </div>
-              <div className="relative">
+              <div className="relative" ref={moreRef}>
                 <button onClick={() => setShowMore(!showMore)} className="p-2 hover:bg-surface-container rounded-full transition-colors">
                   <MoreVertical className="w-5 h-5" />
                 </button>

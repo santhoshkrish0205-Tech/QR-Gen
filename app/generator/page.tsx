@@ -22,34 +22,87 @@ import {
   Bell,
   RotateCcw,
   X,
+  CreditCard,
+  MessageSquare,
+  MapPin,
+  UserSquare,
+  FileText,
+  Star,
+  Sparkles,
 } from 'lucide-react';
 
-const types = [
-  { label: 'Website' as const, icon: LinkIcon },
-  { label: 'Wi-Fi' as const, icon: Wifi },
-  { label: 'Menu' as const, icon: BookOpen },
-  { label: 'Other' as const, icon: MoreHorizontal },
+const qrDestinations = [
+  { id: 'Website', label: 'Website URL', icon: LinkIcon, group: 'Website' },
+  { id: 'Wi-Fi', label: 'Wi-Fi Network', icon: Wifi, group: 'Wi-Fi' },
+  { id: 'UPI', label: 'UPI Payment', icon: CreditCard, group: 'Other' },
+  { id: 'WhatsApp', label: 'WhatsApp Chat', icon: MessageSquare, group: 'Other' },
+  { id: 'GoogleReview', label: 'Google Review', icon: Star, group: 'Website' },
+  { id: 'Location', label: 'Google Maps', icon: MapPin, group: 'Website' },
+  { id: 'vCard', label: 'vCard Contact', icon: UserSquare, group: 'Other' },
+  { id: 'PDFMenu', label: 'PDF Menu', icon: FileText, group: 'Menu' },
 ];
 
 const presetColors = [
-  '#3525cd',
-  '#006c49',
-  '#ba1a1a',
-  '#684000',
+  { name: 'Classic Navy', hex: '#3525cd' },
+  { name: 'Emerald', hex: '#006c49' },
+  { name: 'Crimson', hex: '#ba1a1a' },
+  { name: 'Amber Wood', hex: '#684000' },
+  { name: 'Dark Slate', hex: '#1e293b' },
+  { name: 'Magenta Glow', hex: '#d946ef' },
+];
+
+const presetBgColors = [
+  { name: 'Pure White', hex: '#ffffff' },
+  { name: 'Soft Gray', hex: '#f8fafc' },
+  { name: 'Warm Cream', hex: '#fefbeb' },
+  { name: 'Ice Blue', hex: '#f0f9ff' },
 ];
 
 export default function GeneratorPage() {
   const router = useRouter();
   const { addQrCode, addActivity, settings } = useQr();
 
-  const [selectedType, setSelectedType] = useState<'Website' | 'Wi-Fi' | 'Menu' | 'Other'>('Website');
-  const [selectedColor, setSelectedColor] = useState(settings.defaultColor || '#3525cd');
-  const [selectedFrame, setSelectedFrame] = useState<'square' | 'circle' | 'dots'>(settings.defaultFrame || 'square');
-  const [url, setUrl] = useState('');
+  const [selectedDest, setSelectedDest] = useState(qrDestinations[0]);
   const [name, setName] = useState('');
+  
+  // Customization
+  const [fgColor, setFgColor] = useState(settings.defaultColor || '#3525cd');
+  const [bgColor, setBgColor] = useState('#ffffff');
+  const [selectedFrame, setSelectedFrame] = useState<'square' | 'circle' | 'dots'>(settings.defaultFrame || 'square');
+  const [errorLevel, setErrorLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H');
+  const [qrSize, setQrSize] = useState<number>(512);
+
+  // Form Fields
+  const [url, setUrl] = useState('');
   const [wifiSsid, setWifiSsid] = useState('');
   const [wifiPassword, setWifiPassword] = useState('');
   const [wifiEncryption, setWifiEncryption] = useState('WPA');
+  
+  // UPI
+  const [upiId, setUpiId] = useState('');
+  const [payeeName, setPayeeName] = useState('');
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
+
+  // WhatsApp
+  const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState('');
+
+  // Google Maps Location
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [address, setAddress] = useState('');
+
+  // vCard
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactOrg, setContactOrg] = useState('');
+
+  // PDF Menu / Document URL
+  const [pdfUrl, setPdfUrl] = useState('');
+
   const [logoFile, setLogoFile] = useState<string | null>(null);
   const [logoName, setLogoName] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -57,25 +110,81 @@ export default function GeneratorPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
+  const bgColorInputRef = useRef<HTMLInputElement>(null);
 
-  // Compute the QR data string based on type
+  // Helper to compile the raw text data inside the QR code
   const getQrString = useCallback(() => {
-    if (selectedType === 'Wi-Fi') {
-      return `WIFI:T:${wifiEncryption};S:${wifiSsid};P:${wifiPassword};;`;
+    switch (selectedDest.id) {
+      case 'Wi-Fi':
+        return `WIFI:T:${wifiEncryption};S:${wifiSsid};P:${wifiPassword};;`;
+      case 'UPI':
+        const upiParams = new URLSearchParams();
+        if (upiId) upiParams.append('pa', upiId);
+        if (payeeName) upiParams.append('pn', payeeName);
+        if (amount) upiParams.append('am', amount);
+        if (note) upiParams.append('tn', note);
+        return `upi://pay?${upiParams.toString()}`;
+      case 'WhatsApp':
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+      case 'Location':
+        if (latitude && longitude) {
+          return `https://maps.google.com/local?q=${latitude},${longitude}`;
+        }
+        return address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : '';
+      case 'vCard':
+        return [
+          'BEGIN:VCARD',
+          'VERSION:3.0',
+          `N:${lastName};${firstName};;;`,
+          `FN:${firstName} ${lastName}`,
+          contactOrg ? `ORG:${contactOrg}` : '',
+          contactPhone ? `TEL;TYPE=CELL:${contactPhone}` : '',
+          contactEmail ? `EMAIL;TYPE=PREF,INTERNET:${contactEmail}` : '',
+          'END:VCARD'
+        ].filter(Boolean).join('\n');
+      case 'PDFMenu':
+        return pdfUrl || 'https://shopqr.in/demo-menu.pdf';
+      default:
+        return url || 'https://shopqr.in';
     }
-    return url || 'https://shopqr.co';
-  }, [selectedType, url, wifiSsid, wifiPassword, wifiEncryption]);
+  }, [
+    selectedDest.id,
+    url,
+    wifiSsid,
+    wifiPassword,
+    wifiEncryption,
+    upiId,
+    payeeName,
+    amount,
+    note,
+    phone,
+    message,
+    latitude,
+    longitude,
+    address,
+    firstName,
+    lastName,
+    contactPhone,
+    contactEmail,
+    contactOrg,
+    pdfUrl,
+  ]);
 
-  // Generate QR preview (debounced)
+  // Generate QR preview
   useEffect(() => {
     const timeout = setTimeout(async () => {
       try {
         const data = getQrString();
+        if (!data) {
+          setQrDataUrl(null);
+          return;
+        }
         const dataUrl = await QRCode.toDataURL(data, {
           width: 512,
           margin: 2,
-          color: { dark: selectedColor, light: '#ffffff' },
-          errorCorrectionLevel: 'H',
+          color: { dark: fgColor, light: bgColor },
+          errorCorrectionLevel: errorLevel,
         });
         setQrDataUrl(dataUrl);
       } catch {
@@ -83,9 +192,8 @@ export default function GeneratorPage() {
       }
     }, 300);
     return () => clearTimeout(timeout);
-  }, [selectedColor, getQrString]);
+  }, [fgColor, bgColor, errorLevel, getQrString]);
 
-  // Handle logo upload
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -100,20 +208,23 @@ export default function GeneratorPage() {
     toast.success('Logo uploaded successfully');
   };
 
-  // Generate and download
   const handleGenerateDownload = async () => {
     try {
       const data = getQrString();
+      if (!data) {
+        toast.error('Please fill in the required fields before generating.');
+        return;
+      }
       const dataUrl = await QRCode.toDataURL(data, {
-        width: 1024,
+        width: qrSize,
         margin: 3,
-        color: { dark: selectedColor, light: '#ffffff' },
-        errorCorrectionLevel: 'H',
+        color: { dark: fgColor, light: bgColor },
+        errorCorrectionLevel: errorLevel,
       });
 
-      // Download
+      // Trigger download
       const link = document.createElement('a');
-      const codeName = name || `QR_${selectedType}_${Date.now()}`;
+      const codeName = name || `QR_${selectedDest.id}_${Date.now()}`;
       link.download = `ShopQR_${codeName.replace(/\s+/g, '_')}.png`;
       link.href = dataUrl;
       link.click();
@@ -121,64 +232,84 @@ export default function GeneratorPage() {
       // Save to context
       addQrCode({
         name: codeName,
-        type: selectedType,
-        url: selectedType === 'Wi-Fi' ? '' : url,
+        type: selectedDest.group as 'Website' | 'Wi-Fi' | 'Menu' | 'Other',
+        url: selectedDest.group === 'Website' || selectedDest.group === 'Menu' ? data : '',
         status: 'Active',
-        color: selectedColor,
+        color: fgColor,
         frameStyle: selectedFrame,
         logoUrl: logoFile || undefined,
         dataUrl,
-        wifiSsid: selectedType === 'Wi-Fi' ? wifiSsid : undefined,
-        wifiPassword: selectedType === 'Wi-Fi' ? wifiPassword : undefined,
-        wifiEncryption: selectedType === 'Wi-Fi' ? wifiEncryption : undefined,
+        wifiSsid: selectedDest.id === 'Wi-Fi' ? wifiSsid : undefined,
+        wifiPassword: selectedDest.id === 'Wi-Fi' ? wifiPassword : undefined,
+        wifiEncryption: selectedDest.id === 'Wi-Fi' ? wifiEncryption : undefined,
       });
 
-      addActivity('QR Created', `"${codeName}" was generated and downloaded.`, 'bg-secondary');
-      toast.success(`"${codeName}" generated and saved to dashboard!`);
-    } catch {
-      toast.error('Failed to generate QR code. Check your input.');
+      addActivity('QR Generated', `"${codeName}" was generated and downloaded.`, 'bg-primary');
+      toast.success(`"${codeName}" saved to dashboard and downloaded!`);
+    } catch (err) {
+      toast.error('Failed to generate high-resolution QR code.');
     }
   };
 
-  // Copy link
   const handleCopyLink = async () => {
-    const text = selectedType === 'Wi-Fi' ? getQrString() : url;
-    if (!text) { toast.error('No URL to copy'); return; }
+    const text = getQrString();
+    if (!text) {
+      toast.error('Nothing to copy.');
+      return;
+    }
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Link copied to clipboard!');
+      toast.success('QR payload copied to clipboard!');
     } catch {
-      toast.error('Failed to copy');
+      toast.error('Failed to copy.');
     }
   };
 
-  // Share
   const handleShare = async () => {
-    const text = selectedType === 'Wi-Fi' ? getQrString() : url;
+    const text = getQrString();
     if (navigator.share) {
       try {
-        await navigator.share({ title: name || 'ShopQR Code', text, url: text });
-      } catch {
-        // user cancelled
-      }
+        await navigator.share({
+          title: name || 'ShopQR Destination',
+          text,
+          url: text.startsWith('http') ? text : undefined,
+        });
+      } catch {}
     } else {
       handleCopyLink();
     }
   };
 
-  // Reset
   const handleReset = () => {
-    setSelectedType('Website');
-    setSelectedColor(settings.defaultColor || '#3525cd');
+    setSelectedDest(qrDestinations[0]);
+    setFgColor(settings.defaultColor || '#3525cd');
+    setBgColor('#ffffff');
     setSelectedFrame(settings.defaultFrame || 'square');
+    setErrorLevel('H');
+    setQrSize(512);
     setUrl('');
     setName('');
     setWifiSsid('');
     setWifiPassword('');
     setWifiEncryption('WPA');
+    setUpiId('');
+    setPayeeName('');
+    setAmount('');
+    setNote('');
+    setPhone('');
+    setMessage('');
+    setLatitude('');
+    setLongitude('');
+    setAddress('');
+    setFirstName('');
+    setLastName('');
+    setContactPhone('');
+    setContactEmail('');
+    setContactOrg('');
+    setPdfUrl('');
     setLogoFile(null);
     setLogoName('');
-    toast.info('Form reset to defaults');
+    toast.info('Form cleared.');
   };
 
   return (
@@ -186,252 +317,512 @@ export default function GeneratorPage() {
       <Sidebar />
       <main className="lg:ml-[280px] min-h-screen">
         <div className="flex flex-col lg:flex-row min-h-screen">
-          {/* Left: Config Form */}
-          <div className="flex-1 p-6 md:p-10 max-w-4xl pt-20 lg:pt-6">
-            <header className="mb-10">
-              <h2 className="font-jakarta text-3xl font-bold text-on-surface mb-2">QR Code Generator</h2>
-              <p className="text-on-surface-variant">Design and customize high-resolution QR codes for your storefront.</p>
+          
+          {/* Left Panel: Configuration Form */}
+          <div className="flex-1 p-6 md:p-10 max-w-4xl pt-20 lg:pt-8 space-y-6">
+            <header className="mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#3525cd]/10 text-[#3525cd] flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> Pro Customizer
+                </span>
+              </div>
+              <h2 className="font-jakarta text-3xl font-bold text-on-surface">Smart QR Code Generator</h2>
+              <p className="text-on-surface-variant text-sm">Design tailored QR codes for menus, reviews, chats, wifi networks, and payments.</p>
             </header>
-            <div className="space-y-8">
-              {/* Section 1: Type & Content */}
-              <section className="p-6 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/50">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
-                    <LinkIcon className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-jakarta text-xl font-semibold">Select Type & Content</h3>
+
+            {/* Step 1: Destination Type */}
+            <section className="p-6 bg-white rounded-2xl shadow-sm border border-outline-variant/60">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-xl bg-[#3525cd]/15 flex items-center justify-center text-[#3525cd]">
+                  <LinkIcon className="w-4 h-4" />
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                  {types.map((t) => {
-                    const active = selectedType === t.label;
-                    return (
-                      <button
-                        key={t.label}
-                        onClick={() => setSelectedType(t.label)}
-                        className={`flex flex-col items-center justify-center p-4 rounded-xl transition-all ${
-                          active ? 'border-2 border-primary bg-primary/5' : 'border border-outline-variant hover:border-primary/50'
-                        }`}
-                      >
-                        <t.icon className={`w-5 h-5 mb-1 ${active ? 'text-primary' : 'text-on-surface-variant'}`} />
-                        <span className={`text-xs font-medium ${active ? 'text-primary' : 'text-on-surface-variant'}`}>{t.label}</span>
-                      </button>
-                    );
-                  })}
+                <h3 className="font-jakarta text-lg font-bold">1. Select Destination Type</h3>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {qrDestinations.map((dest) => {
+                  const Icon = dest.icon;
+                  const active = selectedDest.id === dest.id;
+                  return (
+                    <button
+                      key={dest.id}
+                      onClick={() => setSelectedDest(dest)}
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl border text-center transition-all ${
+                        active
+                          ? 'border-[#3525cd] bg-[#3525cd]/5 text-[#3525cd]'
+                          : 'border-outline-variant hover:border-[#3525cd]/50 text-on-surface-variant'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5 mb-2" />
+                      <span className="text-xs font-bold">{dest.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Step 2: Content Details */}
+            <section className="p-6 bg-white rounded-2xl shadow-sm border border-outline-variant/60 space-y-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-9 h-9 rounded-xl bg-[#006c49]/15 flex items-center justify-center text-[#006c49]">
+                  <FileText className="w-4 h-4" />
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block font-medium text-sm mb-2 text-on-surface">Code Name</label>
+                <h3 className="font-jakarta text-lg font-bold">2. Enter Details</h3>
+              </div>
+
+              {/* Common Name */}
+              <div>
+                <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">QR Code Name (Internal)</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                  placeholder="e.g., Table 4 QR, Wifi Signboard, Payment Standee"
+                />
+              </div>
+
+              {/* Dynamic input fields based on selected destination */}
+              {selectedDest.id === 'Website' && (
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Website URL</label>
+                  <input
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    type="url"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                    placeholder="https://example.com"
+                  />
+                </div>
+              )}
+
+              {selectedDest.id === 'Wi-Fi' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="col-span-1 sm:col-span-2">
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Wi-Fi SSID (Network Name)</label>
                     <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
-                      placeholder="e.g., Summer Sale 2024"
+                      value={wifiSsid}
+                      onChange={(e) => setWifiSsid(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., MyBakery_Guest_5G"
                     />
                   </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Password</label>
+                    <input
+                      value={wifiPassword}
+                      onChange={(e) => setWifiPassword(e.target.value)}
+                      type="password"
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="Network Password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Security / Encryption</label>
+                    <select
+                      value={wifiEncryption}
+                      onChange={(e) => setWifiEncryption(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                    >
+                      <option value="WPA">WPA / WPA2 (Recommended)</option>
+                      <option value="WEP">WEP (Legacy)</option>
+                      <option value="nopass">None (Open Network)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
 
-                  {/* Conditional fields based on type */}
-                  {selectedType === 'Wi-Fi' ? (
-                    <>
-                      <div>
-                        <label className="block font-medium text-sm mb-2 text-on-surface">Wi-Fi SSID (Network Name)</label>
-                        <input
-                          value={wifiSsid}
-                          onChange={(e) => setWifiSsid(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
-                          placeholder="MyShop_Guest"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium text-sm mb-2 text-on-surface">Password</label>
-                        <input
-                          value={wifiPassword}
-                          onChange={(e) => setWifiPassword(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
-                          placeholder="Enter Wi-Fi password"
-                          type="password"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium text-sm mb-2 text-on-surface">Encryption</label>
-                        <div className="flex gap-2">
-                          {['WPA', 'WEP', 'None'].map((enc) => (
-                            <button
-                              key={enc}
-                              onClick={() => setWifiEncryption(enc)}
-                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                wifiEncryption === enc ? 'bg-primary text-white' : 'border border-outline-variant hover:border-primary text-on-surface-variant'
-                              }`}
-                            >
-                              {enc}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div>
-                      <label className="block font-medium text-sm mb-2 text-on-surface">
-                        {selectedType === 'Menu' ? 'Menu URL' : 'Target URL'}
-                      </label>
-                      <input
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg border border-outline-variant focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-on-surface bg-white"
-                        placeholder={selectedType === 'Menu' ? 'https://yourshop.com/menu.pdf' : 'https://yourshop.com'}
-                        type="url"
+              {selectedDest.id === 'UPI' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">UPI ID (e.g. payee@upi) *</label>
+                    <input
+                      value={upiId}
+                      onChange={(e) => setUpiId(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="merchantname@upi"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Payee Name *</label>
+                    <input
+                      value={payeeName}
+                      onChange={(e) => setPayeeName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., Green Leaf Cafe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Amount (Optional)</label>
+                    <input
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      type="number"
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., 250"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Transaction Note</label>
+                    <input
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., Table 4 Bill"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {selectedDest.id === 'WhatsApp' && (
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">WhatsApp Phone Number (with Country Code) *</label>
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., +919876543210"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Pre-filled Message</label>
+                    <textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={2}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low resize-none"
+                      placeholder="Hi! I want to order some fresh bread..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              {selectedDest.id === 'GoogleReview' && (
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Google Review Link *</label>
+                  <input
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    type="url"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                    placeholder="https://g.page/r/.../review"
+                  />
+                  <p className="text-[10px] text-on-surface-variant mt-1">Get this link from your Google Business Profile dashboard.</p>
+                </div>
+              )}
+
+              {selectedDest.id === 'Location' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="col-span-1 sm:col-span-2">
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Street Address / Query</label>
+                    <input
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., 42 MG Road, Bangalore"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Latitude (Optional)</label>
+                    <input
+                      value={latitude}
+                      onChange={(e) => setLatitude(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., 12.9716"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Longitude (Optional)</label>
+                    <input
+                      value={longitude}
+                      onChange={(e) => setLongitude(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="e.g., 77.5946"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {selectedDest.id === 'vCard' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">First Name</label>
+                    <input
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="John"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Last Name</label>
+                    <input
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Phone Number</label>
+                    <input
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="+919876543210"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Email</label>
+                    <input
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
+                      type="email"
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  <div className="col-span-1 sm:col-span-2">
+                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Company / Organization</label>
+                    <input
+                      value={contactOrg}
+                      onChange={(e) => setContactOrg(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                      placeholder="Green Leaf Cafe"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {selectedDest.id === 'PDFMenu' && (
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">PDF Link / Menu File URL</label>
+                  <input
+                    value={pdfUrl}
+                    onChange={(e) => setPdfUrl(e.target.value)}
+                    type="url"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                    placeholder="https://example.com/menu.pdf"
+                  />
+                  <p className="text-[10px] text-on-surface-variant mt-1">Upload your PDF file to a cloud drive (e.g. Google Drive, Dropbox) and paste the link here.</p>
+                </div>
+              )}
+            </section>
+
+            {/* Step 3: Style & Brand Customizer */}
+            <section className="p-6 bg-white rounded-2xl shadow-sm border border-outline-variant/60 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <h3 className="font-jakarta text-lg font-bold">3. Style & Brand QR Code</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Foreground Color */}
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">QR Color (Foreground)</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {presetColors.map((c) => (
+                      <button
+                        key={c.hex}
+                        onClick={() => setFgColor(c.hex)}
+                        title={c.name}
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${
+                          fgColor === c.hex ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-transparent'
+                        }`}
+                        style={{ backgroundColor: c.hex }}
                       />
-                    </div>
-                  )}
+                    ))}
+                    <button
+                      onClick={() => colorInputRef.current?.click()}
+                      className="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-low transition-colors relative overflow-hidden"
+                    >
+                      <Palette className="w-3.5 h-3.5 text-on-surface-variant" />
+                      <input
+                        ref={colorInputRef}
+                        type="color"
+                        value={fgColor}
+                        onChange={(e) => setFgColor(e.target.value)}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </button>
+                  </div>
                 </div>
-              </section>
 
-              {/* Section 2: Style & Branding */}
-              <section className="p-6 bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/50">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-shopsecondary">
-                    <Palette className="w-5 h-5" />
+                {/* Background Color */}
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Background Color</label>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {presetBgColors.map((c) => (
+                      <button
+                        key={c.hex}
+                        onClick={() => setBgColor(c.hex)}
+                        title={c.name}
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${
+                          bgColor === c.hex ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-transparent'
+                        }`}
+                        style={{ backgroundColor: c.hex }}
+                      />
+                    ))}
+                    <button
+                      onClick={() => bgColorInputRef.current?.click()}
+                      className="w-8 h-8 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-low transition-colors relative overflow-hidden"
+                    >
+                      <Palette className="w-3.5 h-3.5 text-on-surface-variant" />
+                      <input
+                        ref={bgColorInputRef}
+                        type="color"
+                        value={bgColor}
+                        onChange={(e) => setBgColor(e.target.value)}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </button>
                   </div>
-                  <h3 className="font-jakarta text-xl font-semibold">Style & Branding</h3>
                 </div>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <label className="block font-medium text-sm mb-3 text-on-surface">Primary Color</label>
-                    <div className="flex flex-wrap gap-3">
-                      {presetColors.map((c) => (
-                        <button
-                          key={c}
-                          onClick={() => setSelectedColor(c)}
-                          className={`w-10 h-10 rounded-full shadow-md transition-all ${
-                            selectedColor === c ? 'ring-2 ring-primary border-4 border-white' : 'border-2 border-white'
-                          }`}
-                          style={{ backgroundColor: c }}
-                        />
-                      ))}
-                      <button
-                        onClick={() => colorInputRef.current?.click()}
-                        className="w-10 h-10 rounded-full border-2 border-outline-variant flex items-center justify-center cursor-pointer hover:bg-surface-variant relative overflow-hidden"
+
+                {/* Size & Error Correction Level */}
+                <div className="space-y-4 col-span-1 md:col-span-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Error Correction Level</label>
+                      <select
+                        value={errorLevel}
+                        onChange={(e) => setErrorLevel(e.target.value as 'L' | 'M' | 'Q' | 'H')}
+                        className="w-full px-3 py-2 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-xs bg-surface-container-low"
                       >
-                        <Palette className="w-4 h-4" />
-                        <input
-                          ref={colorInputRef}
-                          type="color"
-                          value={selectedColor}
-                          onChange={(e) => setSelectedColor(e.target.value)}
-                          className="absolute inset-0 opacity-0 cursor-pointer"
-                        />
-                      </button>
+                        <option value="L">Low (7% recovery) - Best for clean layouts</option>
+                        <option value="M">Medium (15% recovery)</option>
+                        <option value="Q">Quartile (25% recovery)</option>
+                        <option value="H">High (30% recovery) - Best for logo overlay</option>
+                      </select>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block font-medium text-sm mb-3 text-on-surface">Frame Style</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        onClick={() => setSelectedFrame('square')}
-                        className={`h-12 rounded-lg flex items-center justify-center cursor-pointer transition-all ${selectedFrame === 'square' ? 'border-2 border-primary bg-primary/5' : 'border border-outline-variant hover:border-primary'}`}
+                    <div>
+                      <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Output Resolution (Size)</label>
+                      <select
+                        value={qrSize}
+                        onChange={(e) => setQrSize(Number(e.target.value))}
+                        className="w-full px-3 py-2 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-xs bg-surface-container-low"
                       >
-                        <div className={`w-6 h-6 border-2 rounded-sm ${selectedFrame === 'square' ? 'border-primary' : 'border-on-surface-variant'}`} />
-                      </button>
-                      <button
-                        onClick={() => setSelectedFrame('circle')}
-                        className={`h-12 rounded-lg flex items-center justify-center cursor-pointer transition-all ${selectedFrame === 'circle' ? 'border-2 border-primary bg-primary/5' : 'border border-outline-variant hover:border-primary'}`}
-                      >
-                        <div className={`w-6 h-6 border-2 rounded-full ${selectedFrame === 'circle' ? 'border-primary' : 'border-on-surface-variant'}`} />
-                      </button>
-                      <button
-                        onClick={() => setSelectedFrame('dots')}
-                        className={`h-12 rounded-lg flex items-center justify-center cursor-pointer transition-all ${selectedFrame === 'dots' ? 'border-2 border-primary bg-primary/5' : 'border border-outline-variant hover:border-primary'}`}
-                      >
-                        <div className={`w-6 h-6 border-2 flex gap-1 p-0.5 ${selectedFrame === 'dots' ? 'border-primary' : 'border-on-surface-variant'}`}>
-                          <div className={`w-1 h-1 rounded-full ${selectedFrame === 'dots' ? 'bg-primary' : 'bg-on-surface-variant'}`} />
-                          <div className={`w-1 h-1 rounded-full ${selectedFrame === 'dots' ? 'bg-primary' : 'bg-on-surface-variant'}`} />
-                        </div>
-                      </button>
+                        <option value="256">256 × 256 px (Small, digital only)</option>
+                        <option value="512">512 × 512 px (Medium, typical)</option>
+                        <option value="1024">1024 × 1024 px (High-Res, print)</option>
+                        <option value="2048">2048 × 2048 px (Ultra High-Res)</option>
+                      </select>
                     </div>
                   </div>
                 </div>
-                <div className="mt-8">
-                  <label className="block font-medium text-sm mb-3 text-on-surface">Logo Overlay</label>
+
+                {/* Logo Upload Overlay */}
+                <div className="col-span-1 md:col-span-2">
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Logo Overlay (Center Brand)</label>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
                   {logoFile ? (
-                    <div className="border-2 border-primary/30 rounded-xl p-4 flex items-center gap-4 bg-primary/5">
-                      <img src={logoFile} alt="Logo preview" className="w-12 h-12 rounded-lg object-contain border border-outline-variant" />
+                    <div className="border border-primary/20 rounded-xl p-3 flex items-center gap-3 bg-primary/5">
+                      <img src={logoFile} alt="Logo" className="w-10 h-10 rounded-lg object-contain border bg-white" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-on-surface truncate">{logoName}</p>
-                        <p className="text-[10px] text-on-surface-variant">Logo will appear at center of QR code</p>
+                        <p className="text-xs font-semibold text-on-surface truncate">{logoName}</p>
+                        <p className="text-[10px] text-on-surface-variant">Applied inside active preview</p>
                       </div>
-                      <button onClick={() => { setLogoFile(null); setLogoName(''); }} className="p-2 text-on-surface-variant hover:text-error rounded-lg transition-colors">
+                      <button onClick={() => { setLogoFile(null); setLogoName(''); }} className="p-1.5 text-on-surface-variant hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center group hover:border-primary transition-colors cursor-pointer"
+                      className="w-full border-2 border-dashed border-outline-variant/65 rounded-xl p-6 flex flex-col items-center justify-center hover:border-primary/60 transition-colors cursor-pointer bg-surface-container-low/20"
                     >
-                      <Upload className="w-8 h-8 text-on-surface-variant group-hover:text-primary transition-colors mb-2" />
-                      <p className="font-medium text-sm text-on-surface-variant group-hover:text-primary">Click to upload SVG or PNG</p>
-                      <p className="text-[10px] text-outline mt-1 uppercase tracking-widest">Recommended: Square, Transparent BG</p>
+                      <Upload className="w-6 h-6 text-on-surface-variant mb-1.5" />
+                      <p className="text-xs font-bold text-on-surface-variant">Click to upload brand logo logo</p>
+                      <p className="text-[9px] text-on-surface-variant/70 mt-0.5">JPEG, PNG or SVG. Square shapes work best.</p>
                     </button>
                   )}
                 </div>
-              </section>
-
-              {/* Section 3: Actions */}
-              <div className="flex items-center justify-between pt-6">
-                <button onClick={handleReset} className="px-6 py-3 font-medium text-sm text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2">
-                  <RotateCcw className="w-4 h-4" /> Reset to Default
-                </button>
-                <button
-                  onClick={handleGenerateDownload}
-                  className="bg-tertiary text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
-                >
-                  <Download className="w-5 h-5" /> Generate and Download
-                </button>
               </div>
+            </section>
+
+            {/* Bottom Actions */}
+            <div className="flex items-center justify-between pt-4">
+              <button onClick={handleReset} className="px-5 py-2.5 font-medium text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1.5">
+                <RotateCcw className="w-3.5 h-3.5" /> Reset Form
+              </button>
+              <button
+                onClick={handleGenerateDownload}
+                className="bg-[#3525cd] text-white px-6 py-3.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-[#3525cd]/25 hover:opacity-90 active:scale-95 transition-all text-sm"
+              >
+                <Download className="w-4 h-4" /> Save & Download QR
+              </button>
             </div>
           </div>
 
-          {/* Right: Preview */}
-          <div className="w-full lg:w-[450px] lg:fixed lg:right-0 lg:top-0 lg:h-screen bg-surface-container-high/50 border-l border-outline-variant/30 flex flex-col items-center justify-center p-8 z-30">
-            <div className="w-full max-w-sm">
-              <div className="mb-8 text-center">
-                <span className="inline-flex items-center gap-2 px-3 py-1 bg-secondary-container/30 text-on-secondary-container rounded-full text-xs font-medium mb-4">
-                  <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" /> Live Preview
+          {/* Right Panel: Floating Live Preview */}
+          <div className="w-full lg:w-[420px] lg:fixed lg:right-0 lg:top-0 lg:h-screen bg-surface-container-low border-l border-outline-variant/30 flex flex-col items-center justify-center p-8 z-30">
+            <div className="w-full max-w-sm flex flex-col items-center">
+              <div className="mb-6 text-center">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#3525cd]/10 text-[#3525cd] rounded-full text-xs font-semibold mb-3">
+                  <span className="w-2 h-2 rounded-full bg-[#3525cd] animate-pulse" /> Live Preview
                 </span>
-                <h4 className="font-jakarta text-2xl font-semibold text-on-surface">Scan to Test</h4>
+                <h4 className="font-jakarta text-xl font-bold text-on-surface">Test With Smartphone</h4>
               </div>
-              <div className="relative group">
+
+              {/* QR Preview Card */}
+              <div className="relative group w-full">
                 <div
-                  className="absolute -inset-4 rounded-[40px] blur-2xl opacity-50"
-                  style={{ background: `linear-gradient(to top right, ${selectedColor}33, transparent, #ffb95f33)` }}
+                  className="absolute -inset-4 rounded-[40px] blur-2xl opacity-45 transition-all"
+                  style={{ background: `linear-gradient(to top right, ${fgColor}25, transparent, #ffb95f20)` }}
                 />
-                <div className="relative bg-white p-8 rounded-[32px] shadow-2xl border border-white" style={{ boxShadow: `0 25px 50px -12px ${selectedColor}1a` }}>
+                <div className="relative bg-white p-6 rounded-[28px] shadow-xl border border-white flex flex-col items-center justify-center">
                   <div
-                    className="aspect-square w-full rounded-2xl flex items-center justify-center overflow-hidden border border-surface-container-high"
-                    style={{ background: 'radial-gradient(circle at 50% 50%, #f0f3ff 0%, #ffffff 100%)' }}
+                    className="aspect-square w-full rounded-2xl flex items-center justify-center overflow-hidden border relative bg-white"
+                    style={{ backgroundColor: bgColor }}
                   >
                     {qrDataUrl ? (
-                      <img src={qrDataUrl} alt="QR Code Preview" className="w-full h-full object-contain p-2 transition-all duration-500 group-hover:scale-105" />
+                      <>
+                        <img
+                          src={qrDataUrl}
+                          alt="QR Code"
+                          className="w-full h-full object-contain p-4 transition-all duration-300"
+                        />
+                        {/* Center Logo Overlay Simulation */}
+                        {logoFile && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-12 h-12 bg-white rounded-xl shadow-md p-1.5 border flex items-center justify-center">
+                              <img src={logoFile} alt="logo" className="w-full h-full object-contain rounded-md" />
+                            </div>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="text-center p-4">
-                        <p className="text-sm text-on-surface-variant">Enter a URL to see your QR code</p>
+                        <p className="text-xs text-on-surface-variant">Fill details to preview QR code</p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="mt-12 grid grid-cols-2 gap-4">
-                <button onClick={handleCopyLink} className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant bg-white hover:bg-surface transition-all font-medium text-sm">
-                  <Copy className="w-4 h-4" /> Copy Link
+
+              {/* Quick Actions for Preview */}
+              <div className="mt-8 grid grid-cols-2 gap-3 w-full">
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl border border-outline-variant bg-white hover:bg-surface-container-low transition-all font-semibold text-xs text-on-surface"
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copy Payload
                 </button>
-                <button onClick={handleShare} className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-outline-variant bg-white hover:bg-surface transition-all font-medium text-sm">
-                  <Share2 className="w-4 h-4" /> Share
+                <button
+                  onClick={handleShare}
+                  className="flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl border border-outline-variant bg-white hover:bg-surface-container-low transition-all font-semibold text-xs text-on-surface"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Share
                 </button>
               </div>
-              <div className="mt-8 p-4 rounded-xl bg-surface-container flex items-start gap-3 border border-outline-variant/30">
-                <Info className="w-4 h-4 text-secondary mt-0.5 shrink-0" />
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Changes are saved automatically to your dashboard. This QR is <b>Dynamic</b>, meaning you can update the destination link anytime without re-printing.
+
+              {/* Help tip info box */}
+              <div className="mt-6 p-4 rounded-xl bg-white border border-outline-variant/30 flex items-start gap-2.5 w-full">
+                <Info className="w-4 h-4 text-[#3525cd] mt-0.5 shrink-0" />
+                <p className="text-[10px] text-on-surface-variant leading-relaxed">
+                  Generated code is stored in the <b>QR Database</b> automatically. This is a <b>Dynamic QR code</b>, allowing you to update its destination in the dashboard without re-printing.
                 </p>
               </div>
             </div>
@@ -439,24 +830,21 @@ export default function GeneratorPage() {
         </div>
       </main>
 
-      {/* Mobile Header */}
+      {/* Mobile Top Bar */}
       <div className="lg:hidden fixed top-0 w-full bg-surface shadow-sm h-16 flex items-center px-4 z-50 border-b border-outline-variant/30">
         <button onClick={() => setShowMobileMenu(!showMobileMenu)} className="p-2 mr-2">
-          <Menu className="w-5 h-5" />
+          <Menu className="w-5 h-5 text-on-surface" />
         </button>
-        <span className="font-jakarta text-lg font-bold text-primary">ShopQR</span>
+        <span className="font-jakarta text-lg font-bold text-[#3525cd]">ShopQR</span>
         <div className="ml-auto flex gap-3">
-          <Link href="/dashboard" className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center">
-            <Bell className="w-5 h-5" />
-          </Link>
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary-container to-secondary-container" />
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-primary-container to-secondary-container" />
         </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}
       {showMobileMenu && (
         <div className="lg:hidden fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowMobileMenu(false)} />
+          <div className="absolute inset-0 bg-black/45" onClick={() => setShowMobileMenu(false)} />
           <div className="absolute left-0 top-0 h-full w-[280px] bg-surface-container shadow-2xl">
             <Sidebar />
           </div>

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, QrCode, BarChart3, Settings, Plus, HelpCircle, LogOut, UtensilsCrossed, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMenu } from '@/lib/menu-context';
+import { logout } from '@/app/login/actions';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -82,13 +83,15 @@ export default function Sidebar() {
           <HelpCircle className="w-5 h-5" />
           Help Center
         </button>
-        <Link
-          href="/"
-          className="flex items-center gap-3 py-3 px-4 text-on-surface-variant font-medium text-sm rounded-xl hover:bg-surface-variant transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          Logout
-        </Link>
+        <form action={logout}>
+          <button
+            type="submit"
+            className="flex items-center gap-3 py-3 px-4 text-on-surface-variant font-medium text-sm rounded-xl hover:bg-surface-variant transition-colors w-full"
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </button>
+        </form>
       </div>
     </aside>
   );

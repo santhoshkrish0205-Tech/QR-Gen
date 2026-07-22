@@ -7,6 +7,7 @@ import Sidebar from '@/components/sidebar';
 import { useQr } from '@/lib/qr-context';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
+import { createQrCode } from '@/app/actions/qr';
 import {
   Link as LinkIcon,
   Wifi,
@@ -60,17 +61,26 @@ const presetBgColors = [
 
 export default function GeneratorPage() {
   const router = useRouter();
-  const { addQrCode, addActivity, settings } = useQr();
+  const { addQrCode, addActivity } = useQr();
 
   const [selectedDest, setSelectedDest] = useState(qrDestinations[0]);
   const [name, setName] = useState('');
   
   // Customization
-  const [fgColor, setFgColor] = useState(settings.defaultColor || '#3525cd');
+  const [fgColor, setFgColor] = useState('#3525cd');
   const [bgColor, setBgColor] = useState('#ffffff');
-  const [selectedFrame, setSelectedFrame] = useState<'square' | 'circle' | 'dots'>(settings.defaultFrame || 'square');
+  const [selectedFrame, setSelectedFrame] = useState<'square' | 'circle' | 'dots'>('square');
   const [errorLevel, setErrorLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H');
   const [qrSize, setQrSize] = useState<number>(512);
+
+  useEffect(() => {
+    import('@/app/settings/actions').then((m) => {
+      m.getUserSettings().then((s) => {
+        setFgColor(s.defaultColor);
+        setSelectedFrame(s.defaultFrame);
+      });
+    });
+  }, []);
 
   // Form Fields
   const [url, setUrl] = useState('');
@@ -88,10 +98,7 @@ export default function GeneratorPage() {
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
 
-  // Google Maps Location
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [address, setAddress] = useState('');
+  // Google Maps Location is now using the 'url' state
 
   // vCard
   const [firstName, setFirstName] = useState('');
@@ -128,10 +135,7 @@ export default function GeneratorPage() {
         const cleanPhone = phone.replace(/[^0-9]/g, '');
         return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
       case 'Location':
-        if (latitude && longitude) {
-          return `https://maps.google.com/local?q=${latitude},${longitude}`;
-        }
-        return address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : '';
+        return url || 'https://maps.app.goo.gl/';
       case 'vCard':
         return [
           'BEGIN:VCARD',
@@ -160,9 +164,6 @@ export default function GeneratorPage() {
     note,
     phone,
     message,
-    latitude,
-    longitude,
-    address,
     firstName,
     lastName,
     contactPhone,
@@ -215,12 +216,47 @@ export default function GeneratorPage() {
         toast.error('Please fill in the required fields before generating.');
         return;
       }
-      const dataUrl = await QRCode.toDataURL(data, {
+      let dataUrl = await QRCode.toDataURL(data, {
         width: qrSize,
         margin: 3,
         color: { dark: fgColor, light: bgColor },
         errorCorrectionLevel: errorLevel,
       });
+
+      if (logoFile) {
+        dataUrl = await new Promise<string>((resolve) => {
+          const canvas = document.createElement('canvas');
+          canvas.width = qrSize;
+          canvas.height = qrSize;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return resolve(dataUrl);
+
+          const qrImg = new Image();
+          qrImg.crossOrigin = 'anonymous';
+          qrImg.onload = () => {
+            ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+            const logoImg = new Image();
+            logoImg.crossOrigin = 'anonymous';
+            logoImg.onload = () => {
+              const logoSize = qrSize * 0.25;
+              const xy = (qrSize - logoSize) / 2;
+              
+              // Draw background for logo to make it readable
+              ctx.fillStyle = bgColor;
+              ctx.beginPath();
+              ctx.roundRect(xy - (qrSize * 0.02), xy - (qrSize * 0.02), logoSize + (qrSize * 0.04), logoSize + (qrSize * 0.04), qrSize * 0.03);
+              ctx.fill();
+              
+              ctx.drawImage(logoImg, xy, xy, logoSize, logoSize);
+              resolve(canvas.toDataURL('image/png'));
+            };
+            logoImg.onerror = () => resolve(dataUrl);
+            logoImg.src = logoFile;
+          };
+          qrImg.onerror = () => resolve(dataUrl);
+          qrImg.src = dataUrl;
+        });
+      }
 
       // Trigger download
       const link = document.createElement('a');
@@ -229,19 +265,29 @@ export default function GeneratorPage() {
       link.href = dataUrl;
       link.click();
 
-      // Save to context
-      addQrCode({
+      // Prepare Metadata
+      const metadata = {
+        wifiSsid, wifiPassword, wifiEncryption,
+        upiId, payeeName, amount, note,
+        phone, message,
+        firstName, lastName, contactPhone, contactEmail, contactOrg,
+        pdfUrl
+      };
+
+      // Save to database
+      await createQrCode({
         name: codeName,
-        type: selectedDest.group as 'Website' | 'Wi-Fi' | 'Menu' | 'Other',
-        url: selectedDest.group === 'Website' || selectedDest.group === 'Menu' ? data : '',
-        status: 'Active',
-        color: fgColor,
-        frameStyle: selectedFrame,
-        logoUrl: logoFile || undefined,
-        dataUrl,
-        wifiSsid: selectedDest.id === 'Wi-Fi' ? wifiSsid : undefined,
-        wifiPassword: selectedDest.id === 'Wi-Fi' ? wifiPassword : undefined,
-        wifiEncryption: selectedDest.id === 'Wi-Fi' ? wifiEncryption : undefined,
+        type: selectedDest.group,
+        destination_id: selectedDest.id,
+        url: data,
+        fg_color: fgColor,
+        bg_color: bgColor,
+        frame_style: selectedFrame,
+        error_level: errorLevel,
+        qr_size: qrSize,
+        logo_url: logoFile || undefined,
+        data_url: dataUrl,
+        metadata
       });
 
       addActivity('QR Generated', `"${codeName}" was generated and downloaded.`, 'bg-primary');
@@ -512,34 +558,16 @@ export default function GeneratorPage() {
               )}
 
               {selectedDest.id === 'Location' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="col-span-1 sm:col-span-2">
-                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Street Address / Query</label>
-                    <input
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
-                      placeholder="e.g., 42 MG Road, Bangalore"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Latitude (Optional)</label>
-                    <input
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
-                      placeholder="e.g., 12.9716"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Longitude (Optional)</label>
-                    <input
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
-                      placeholder="e.g., 77.5946"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5">Google Maps Link *</label>
+                  <input
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    type="url"
+                    className="w-full px-4 py-3 rounded-xl border border-outline-variant focus:ring-2 focus:ring-[#3525cd]/20 focus:border-[#3525cd] outline-none text-sm bg-surface-container-low"
+                    placeholder="https://maps.app.goo.gl/..."
+                  />
+                  <p className="text-[10px] text-on-surface-variant mt-1">Paste the share link from Google Maps.</p>
                 </div>
               )}
 

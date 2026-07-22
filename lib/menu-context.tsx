@@ -212,76 +212,37 @@ export const MENU_THEMES: MenuTheme[] = [
 
 const seedRestaurant: Restaurant = {
   id: 'rest-1',
-  name: 'Green Leaf Café',
-  slug: 'greenleaf',
-  tagline: 'Fresh. Local. Delicious.',
+  name: '',
+  slug: '',
+  tagline: '',
   logo: '',
   banner: '',
-  phone: '+91 98765 43210',
-  address: '42, MG Road, Bangalore, Karnataka 560001',
-  themeId: 'cafe',
-  isOpen: true,
-  rating: 4.5,
-  totalReviews: 248,
-  googleReviewUrl: 'https://g.page/r/greenleafcafe/review',
-  socialLinks: {
-    instagram: 'https://instagram.com/greenleafcafe',
-    facebook: 'https://facebook.com/greenleafcafe',
-    website: 'https://greenleafcafe.in',
-    whatsapp: '+919876543210',
-  },
+  phone: '',
+  address: '',
+  themeId: 'minimal',
+  isOpen: false,
+  rating: 0,
+  totalReviews: 0,
+  googleReviewUrl: '',
+  socialLinks: {},
   openingHours: {
-    monday: '8:00 AM – 10:00 PM',
-    tuesday: '8:00 AM – 10:00 PM',
-    wednesday: '8:00 AM – 10:00 PM',
-    thursday: '8:00 AM – 10:00 PM',
-    friday: '8:00 AM – 11:00 PM',
-    saturday: '9:00 AM – 11:00 PM',
-    sunday: '9:00 AM – 9:00 PM',
+    monday: '',
+    tuesday: '',
+    wednesday: '',
+    thursday: '',
+    friday: '',
+    saturday: '',
+    sunday: '',
   },
-  published: true,
-  currency: '₹',
-  totalViews: 1284,
-  totalScans: 342,
+  published: false,
+  currency: '$',
+  totalViews: 0,
+  totalScans: 0,
 };
 
-const seedCategories: Category[] = [
-  { id: 'cat-1', restaurantId: 'rest-1', name: 'Pizza', emoji: '🍕', sortOrder: 0 },
-  { id: 'cat-2', restaurantId: 'rest-1', name: 'Burgers', emoji: '🍔', sortOrder: 1 },
-  { id: 'cat-3', restaurantId: 'rest-1', name: 'Sandwiches', emoji: '🥪', sortOrder: 2 },
-  { id: 'cat-4', restaurantId: 'rest-1', name: 'Salads', emoji: '🥗', sortOrder: 3 },
-  { id: 'cat-5', restaurantId: 'rest-1', name: 'Pasta', emoji: '🍝', sortOrder: 4 },
-  { id: 'cat-6', restaurantId: 'rest-1', name: 'Drinks', emoji: '🥤', sortOrder: 5 },
-  { id: 'cat-7', restaurantId: 'rest-1', name: 'Desserts', emoji: '🍰', sortOrder: 6 },
-];
+const seedCategories: Category[] = [];
 
-const seedMenuItems: MenuItem[] = [
-  // Pizza
-  { id: 'item-1', categoryId: 'cat-1', name: 'Margherita', description: 'Classic tomato sauce, fresh mozzarella, basil', price: 249, image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-2', categoryId: 'cat-1', name: 'Veg Supreme', description: 'Bell peppers, mushrooms, olives, corn, onions', price: 349, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: true },
-  { id: 'item-3', categoryId: 'cat-1', name: 'Spicy BBQ Chicken', description: 'Grilled chicken, BBQ sauce, jalapeños, red onions', price: 399, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80', isVeg: false, isPopular: true, isAvailable: true, isSpicy: true, isNew: false, isChefSpecial: false },
-  { id: 'item-4', categoryId: 'cat-1', name: 'Farmhouse', description: 'Fresh veggies on a herb-seasoned base', price: 299, image: 'https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: true, isChefSpecial: false },
-  // Burgers
-  { id: 'item-5', categoryId: 'cat-2', name: 'Classic Veg Burger', description: 'Potato patty, lettuce, tomato, pickles', price: 179, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-6', categoryId: 'cat-2', name: 'Cheese Burst', description: 'Double cheese, crispy onions, special sauce', price: 229, image: 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-7', categoryId: 'cat-2', name: 'Chicken Crunch', description: 'Crispy fried chicken, coleslaw, sriracha mayo', price: 279, image: 'https://images.unsplash.com/photo-1586816001966-79b736744398?w=400&q=80', isVeg: false, isPopular: false, isAvailable: true, isSpicy: true, isNew: true, isChefSpecial: true },
-  // Sandwiches
-  { id: 'item-8', categoryId: 'cat-3', name: 'Club Sandwich', description: 'Triple-decker with grilled chicken, bacon, veggies', price: 199, image: 'https://images.unsplash.com/photo-1528736235302-52922df5c122?w=400&q=80', isVeg: false, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-9', categoryId: 'cat-3', name: 'Grilled Paneer', description: 'Marinated paneer, mint chutney, veggies', price: 159, image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  // Salads
-  { id: 'item-10', categoryId: 'cat-4', name: 'Garden Fresh', description: 'Mixed greens, cherry tomatoes, cucumber, vinaigrette', price: 149, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-11', categoryId: 'cat-4', name: 'Caesar Salad', description: 'Romaine, croutons, parmesan, Caesar dressing', price: 189, image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: true },
-  // Pasta
-  { id: 'item-12', categoryId: 'cat-5', name: 'Arrabiata', description: 'Penne in spicy tomato sauce, fresh herbs', price: 219, image: 'https://images.unsplash.com/photo-1600803907087-f56d462fd26b?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: true, isNew: false, isChefSpecial: false },
-  { id: 'item-13', categoryId: 'cat-5', name: 'Pesto Pasta', description: 'Basil pesto, cherry tomatoes, parmesan', price: 239, image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  // Drinks
-  { id: 'item-14', categoryId: 'cat-6', name: 'Cold Coffee', description: 'Chilled brewed coffee with cream', price: 89, image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-15', categoryId: 'cat-6', name: 'Fresh Lime Soda', description: 'Sweet, salty or mixed, your choice', price: 59, image: 'https://images.unsplash.com/photo-1523371054106-bbf80586c38c?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-  { id: 'item-16', categoryId: 'cat-6', name: 'Mango Smoothie', description: 'Fresh Alphonso mango, chilled', price: 99, image: 'https://images.unsplash.com/photo-1502741224143-90386d7f8c82?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: true, isChefSpecial: false },
-  // Desserts
-  { id: 'item-17', categoryId: 'cat-7', name: 'Chocolate Lava Cake', description: 'Warm chocolate cake with molten center & vanilla ice cream', price: 149, image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80', isVeg: true, isPopular: true, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: true },
-  { id: 'item-18', categoryId: 'cat-7', name: 'Tiramisu', description: 'Classic Italian dessert with espresso-soaked ladyfingers', price: 169, image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&q=80', isVeg: true, isPopular: false, isAvailable: true, isSpicy: false, isNew: false, isChefSpecial: false },
-];
+const seedMenuItems: MenuItem[] = [];
 
 // ── Context Types ─────────────────────────────────────────────────────────────
 

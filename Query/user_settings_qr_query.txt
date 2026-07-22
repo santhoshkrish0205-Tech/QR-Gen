@@ -1,0 +1,112 @@
+-- ==========================================
+-- 1. USER SETTINGS TABLE & POLICIES
+-- ==========================================
+
+create table if not exists public.user_settings (
+  id uuid references auth.users(id) on delete cascade primary key,
+  store_name text,
+  email text,
+  avatar_url text,
+  default_color text default '#3525cd',
+  default_frame text default 'square',
+  notify_scans boolean default true,
+  notify_milestones boolean default true,
+  notify_weekly boolean default false,
+  updated_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+alter table public.user_settings enable row level security;
+
+-- Drop existing policies to recreate them safely
+drop policy if exists "Users can view their own settings" on public.user_settings;
+drop policy if exists "Users can insert their own settings" on public.user_settings;
+drop policy if exists "Users can update their own settings" on public.user_settings;
+
+create policy "Users can view their own settings"
+  on public.user_settings for select
+  using (auth.uid() = id);
+
+create policy "Users can insert their own settings"
+  on public.user_settings for insert
+  with check (auth.uid() = id);
+
+create policy "Users can update their own settings"
+  on public.user_settings for update
+  using (auth.uid() = id);
+
+
+-- ==========================================
+-- 2. QR CODES TABLE & POLICIES
+-- ==========================================
+
+create table if not exists public.qr_codes (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  name text not null,
+  type text not null,
+  destination_id text not null,
+  url text,
+  status text default 'Active',
+  scans integer default 0,
+  fg_color text default '#3525cd',
+  bg_color text default '#ffffff',
+  frame_style text default 'square',
+  error_level text default 'H',
+  qr_size integer default 512,
+  logo_url text,
+  data_url text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.qr_codes enable row level security;
+
+-- Drop existing policies to recreate them safely
+drop policy if exists "Users can view their own QR codes" on public.qr_codes;
+drop policy if exists "Users can insert their own QR codes" on public.qr_codes;
+drop policy if exists "Users can update their own QR codes" on public.qr_codes;
+drop policy if exists "Users can delete their own QR codes" on public.qr_codes;
+
+create policy "Users can view their own QR codes"
+  on public.qr_codes for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own QR codes"
+  on public.qr_codes for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own QR codes"
+  on public.qr_codes for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete their own QR codes"
+  on public.qr_codes for delete
+  using (auth.uid() = user_id);
+
+
+-- ==========================================
+-- 3. STORAGE BUCKET (AVATARS) & POLICIES
+-- ==========================================
+
+-- Will safely do nothing if the 'avatars' bucket already exists
+insert into storage.buckets (id, name, public) 
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Avatar images are publicly accessible" on storage.objects;
+drop policy if exists "Authenticated users can upload avatars" on storage.objects;
+drop policy if exists "Authenticated users can update avatars" on storage.objects;
+
+create policy "Avatar images are publicly accessible"
+  on storage.objects for select
+  using ( bucket_id = 'avatars' );
+
+create policy "Authenticated users can upload avatars"
+  on storage.objects for insert
+  to authenticated
+  with check ( bucket_id = 'avatars' );
+
+create policy "Authenticated users can update avatars"
+  on storage.objects for update
+  to authenticated
+  using ( bucket_id = 'avatars' );
